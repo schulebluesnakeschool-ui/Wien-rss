@@ -11,29 +11,44 @@ def get_data():
 
 data = get_data()
 
-items = data["data"]["monitors"][0]["lines"]
+# Sicherstellen, dass monitors existieren
+monitors = data.get("data", {}).get("monitors", [])
 
 rss_items = ""
 
-for i, line in enumerate(items):
-    if line["name"] == "13A" and "Hauptbahnhof" in line["towards"]:
-        for dep in line["departures"]["departure"]:
-            try:
-                time = dep["departureTime"]["timeReal"]
-                dt = datetime.fromtimestamp(time / 1000)
-                t = dt.strftime("%H:%M:%S")
+# Wenn keine Monitors → trotzdem Feed erzeugen
+if not monitors:
+    now = datetime.now().strftime("%H:%M:%S")
+    rss_items = f"""
+    <item>
+      <title>Keine Daten ({now})</title>
+      <description>Keine Abfahrten gefunden</description>
+      <guid>{now}</guid>
+    </item>
+    """
+else:
+    # Monitors durchgehen
+    for monitor in monitors:
+        for line in monitor.get("lines", []):
+            if line.get("name") == "13A" and "Hauptbahnhof" in line.get("towards", ""):
+                for dep in line.get("departures", {}).get("departure", []):
+                    try:
+                        time = dep["departureTime"]["timeReal"]
+                        dt = datetime.fromtimestamp(time / 1000)
+                        t = dt.strftime("%H:%M:%S")
 
-                rss_items += f"""
-                <item>
-                  <title>13A → Hauptbahnhof um {t}</title>
-                  <description>Abfahrt um {t}</description>
-                  <guid>{t}-{i}</guid>
-                </item>
-                """
-            except:
-                pass
+                        rss_items += f"""
+                        <item>
+                          <title>13A → Hauptbahnhof um {t}</title>
+                          <description>Abfahrt um {t}</description>
+                          <guid>{t}</guid>
+                        </item>
+                        """
+                    except:
+                        pass
 
-if not rss_items:
+# Falls trotz allem keine Items erzeugt wurden
+if not rss_items.strip():
     now = datetime.now().strftime("%H:%M:%S")
     rss_items = f"""
     <item>
