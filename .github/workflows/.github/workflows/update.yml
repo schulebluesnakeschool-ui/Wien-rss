@@ -1,36 +1,61 @@
-name: Update RSS Feed every 30 seconds
+import urllib.request
+import urllib.parse
+import json
+from datetime import datetime
 
-on:
-  schedule:
-    - cron: "*/1 * * * *"   # läuft jede Minute
-  workflow_dispatch:
+def get_json(url, params=None):
+    if params:
+        url = url + "?" + urllib.parse.urlencode(params)
+    with urllib.request.urlopen(url) as response:
+        return json.loads(response.read().decode("utf-8"))
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
+# 1. Haltestelle "Strozzigasse" suchen
+stop_search = get_json(
+    "https://transport.rest/stops",
+    {"query": "Strozzigasse", "results": 1}
+)
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+stop_id = stop_search[0]["id"]
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.x"
+# 2. Abfahrten abrufen
+departures = get_json(
+    f"https://transport.rest/stops/{stop_id}/departures",
+    {"duration": 30}
+)
 
-      - name: Run update script (first run)
-        run: python update.py
+# 3. Filtern: nur 13A Richtung Hauptbahnhof
+filtered = []
+for dep in departures:
+    if dep["line"]["name"] == "13A" and "Hauptbahnhof" in dep["direction"]:
+        filtered.append(dep)
 
-      - name: Wait 30 seconds
-        run: sleep 30
+# 4. RSS-Feed erzeugen
+rss_items = ""
+for i, dep in enumerate(filtered):
+    when = dep["when"]
+    dt = datetime.fromisoformat(when.replace("Z", "+00:00"))
+    time_str = dt.strftime("%H:%M:%S")
 
-      - name: Run update script (second run)
-        run: python update.py
+    rss_items += f"""
+    <item>
+      <title>13A → Hauptbahnhof um {time_str}</title>
+      <description>Abfahrt um {time_str}</description>
+      <guid>13A-{i}</guid>
+    </item>
+    """
 
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add .
-          git commit -m "Auto-update RSS feed"
-          git push
+rss_feed = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>13A Strozzigasse → Hauptbahnhof</title>
+    <link>https://transport.rest</link>
+    <description>Echtzeit-Abfahrten des 13A ab Strozzigasse Richtung Hauptbahnhof</description>
+    <language>de</language>
+    {rss_items}
+  </channel>
+</rss>
+"""
+
+# 5. Datei speichern
+with open("13a-strozzigasse-hbf.xml", "w", encoding="utf-8") as f:
+    f.write(rss_feed)
