@@ -1,0 +1,36 @@
+name: Update RSS Feed every 30 seconds
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"   # läuft jede Minute
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Run update script (first run)
+        run: python update.py
+
+      - name: Wait 30 seconds
+        run: sleep 30
+
+      - name: Run update script (second run)
+        run: python update.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-update RSS feed"
+          git push
