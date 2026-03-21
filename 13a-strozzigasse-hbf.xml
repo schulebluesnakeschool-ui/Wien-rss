@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Wiener Linien – 13A Strozzigasse → Hauptbahnhof</title>
+    <title>13A Strozzigasse → Hauptbahnhof</title>
     <link>https://transport.rest</link>
-    <description>Echtzeit-Abfahrten des 13A ab Strozzigasse Richtung Hauptbahnhof</description>
+    <description>Echtzeit-Abfahrten des 13A</description>
     <language>de</language>
-
-    <!-- Beispiel-Einträge – werden später dynamisch ersetzt -->
+    
     <item>
-      <title>13A → Hauptbahnhof in 3 Minuten</title>
-      <description>Abfahrt um 12:34</description>
-      <guid>13A-1</guid>
+      <title>Keine Daten</title>
+      <description>Keine Abfahrten gefunden</description>
+      <guid>none</guid>
     </item>
-
-    <item>
-      <title>13A → Hauptbahnhof in 10 Minuten</title>
-      <description>Abfahrt um 12:41</description>
-      <guid>13A-2</guid>
-    </item>
-
+    
   </channel>
 </rss>
