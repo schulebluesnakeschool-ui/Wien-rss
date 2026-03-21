@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>13A Widget</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: #111;
+    color: #fff;
+    text-align: center;
+  }
+  .box {
+    padding: 20px;
+  }
+  .title {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .time {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+  .small {
+    font-size: 16px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="title">13A → Hauptbahnhof</div>
+  <div id="next" class="time">Lade…</div>
+  <div id="after" class="small"></div>
+</div>
+
+<script>
+async function load() {
+  try {
+    const res = await fetch("13a-strozzigasse-hbf.xml");
+    const text = await res.text();
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "text/xml");
+
+    const items = [...xml.getElementsByTagName("item")];
+
+    if (items.length === 0) {
+      document.getElementById("next").innerText = "Keine Daten";
+      return;
+    }
+
+    const first = items[0].getElementsByTagName("title")[0].textContent;
+    const second = items[1]?.getElementsByTagName("title")[0]?.textContent || "";
+
+    document.getElementById("next").innerText = first.replace("13A → Hauptbahnhof um ", "");
+    document.getElementById("after").innerText = second ? "Danach: " + second.replace("13A → Hauptbahnhof um ", "") : "";
+  } catch (e) {
+    document.getElementById("next").innerText = "Fehler";
+  }
+}
+
+load();
+setInterval(load, 15000); // alle 15 Sekunden aktualisieren
+</script>
+</body>
+</html>
