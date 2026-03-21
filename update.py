@@ -9,7 +9,8 @@ def safe_get(url, params=None):
             url = url + "?" + urllib.parse.urlencode(params)
         with urllib.request.urlopen(url) as response:
             return json.loads(response.read().decode("utf-8"))
-    except:
+    except Exception as e:
+        print("API error:", e)
         return None
 
 # 1. Haltestelle suchen
@@ -83,3 +84,5 @@ rss_feed = f"""<?xml version="1.0" encoding="UTF-8"?>
 
 with open("13a-strozzigasse-hbf.xml", "w", encoding="utf-8") as f:
     f.write(rss_feed)
+
+print("RSS updated successfully")
