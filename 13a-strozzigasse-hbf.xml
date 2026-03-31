@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>13A Strozzigasse → Hauptbahnhof</title>
+    <link>https://www.wienerlinien.at</link>
+    <description>Echtzeit-Abfahrten des 13A</description>
+    <language>de</language>
+    
+    <item>
+      <title>Keine Daten (10:46:40)</title>
+      <description>Keine Abfahrten gefunden</description>
+      <guid>10:46:40</guid>
+    </item>
+    
+  </channel>
+</rss>
