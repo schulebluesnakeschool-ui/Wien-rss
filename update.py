@@ -2,7 +2,7 @@ import urllib.request
 import json
 from datetime import datetime
 
-STOP_ID = "4081"  # Strozzigasse/Zieglergasse Richtung Hauptbahnhof
+STOP_ID = "60202024" 
 
 def get_data():
     url = f"https://www.wienerlinien.at/ogd_realtime/monitor?stopId={STOP_ID}"
